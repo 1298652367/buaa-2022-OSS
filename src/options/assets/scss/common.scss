@@ -1,0 +1,42 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+body {
+  background-color: #dbdbdb;
+}
+
+.a-link {
+  color: #1890ff;
+  cursor: pointer;
+}
+ 
+.common-settings {
+  >ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-top: 24px;
+      display: flex;
+      span + div{
+        flex: 1;
+      }
+      > span {
+        width: 160px;
+        color: rgba(0, 0, 0, 0.85);
+        font-size: 14px;
+        margin-right: 16px;
+        display: inline-block;
+        text-align: right;
+      }
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+}

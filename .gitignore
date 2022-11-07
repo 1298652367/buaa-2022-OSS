@@ -1,0 +1,8 @@
+/node_modules
+/*.log
+/dist
+/dist-zip
+/extension
+.idea
+.DS_Store 
+/src/HttpInterceptor

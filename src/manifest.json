@@ -1,0 +1,74 @@
+{
+  "name": "C笔记",
+  "description": "一个为 IT人士打造的笔记工具",
+  "homepage_url": "https://plugin.csdn.net/",
+  "version": "", 
+  "manifest_version": 3,
+  "icons": {
+    "16": "icons/icon-logo-16.png",
+    "48": "icons/icon-logo-48.png",
+    "128": "icons/icon-logo-128.png"
+  },
+  "minimum_chrome_version": "88.0", 
+  "permissions": [
+    "tabs",
+    "contextMenus",
+    "storage",
+    "webNavigation", 
+    "declarativeNetRequest",
+    "cookies"
+  ],
+  "declarative_net_request" : {
+    "rule_resources" : [ 
+      {
+        "id" : "bizModifyHeader",
+        "enabled": true,
+        "path": "json/bizModifyHeader.json"
+      }
+    ]
+  },
+  "host_permissions": [ 
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "serviceWorker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "js/content.js"
+      ],
+      "css": [],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "options_page": "pages/options.html", 
+  "action": {
+    "default_popup": "pages/popup.html",
+    "default_icon": "icons/icon-logo.png",
+    "default_title": "CSDN"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "packages/*", 
+        "svg/*", 
+        "images/*", 
+        "icons/*", 
+        "pages/*", 
+        "js/*",
+        "css/jsonPages.css", 
+        "vendor/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ], 
+  "externally_connectable": {
+    "matches": ["*://*.csdn.net/*"]
+  }
+}
