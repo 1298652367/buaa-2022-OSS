@@ -32,6 +32,7 @@ export default {
     }
     const [comment] = collectItem.comment;
     const result = {
+      // 收藏的信息在这里获取
       topicInfo: {
         url: 'https://bbs.csdn.net/topics/XXX',
         id: collectItem.id,

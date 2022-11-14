@@ -28,9 +28,10 @@
                     <a-menu-item>
                       <div @click="editComment(comment)"><a-icon type="edit" theme="filled" style="font-size:14px;margin-right:8px;" />编辑</div>
                     </a-menu-item>
-                    <!-- <a-menu-item>
+                    //删除comment
+                    <a-menu-item>
                       <div @click="deleteComment(comment)"><a-icon type="delete" theme="filled" style="font-size:14px;margin-right:8px;" />删除</div>
-                    </a-menu-item> -->
+                    </a-menu-item>
                   </a-menu>
                 </a-dropdown>
               </div>
