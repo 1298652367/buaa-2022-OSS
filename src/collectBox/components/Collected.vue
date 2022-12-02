@@ -8,34 +8,42 @@
           <div>{{ data.url }}</div>
         </a>
         <div class="tags">
-          <a v-if="cloudUrl" target="_blank" :href="`${cloudUrl}?typeId=${data.cateId}`">{{ data.cateName }}</a>
-          <span v-else>{{ data.cateName }}</span>
-          <!-- <span v-for="tag in comment.tags" :key="tag">{{ tag }}</span> -->
+          <!-- <a v-if="cloudUrl"  target="_blank" :href="`${cloudUrl}?typeId=${data.cateId}`">{{ data.cateName }}</a> -->
+          <a @click="select(23632)">全部</a>
+          <a @click="select(23646)">博客笔记</a>
+          <a @click="select(23647)">技术</a>
+          <a @click="select(23648)">工作</a>
+          <a @click="select(23649)">资料</a>
+          <a @click="select(23650)">生活</a>
+          <a @click="select(23651)">代办</a>
+          <!-- <span v-else>{{ data.cateName }}</span> -->
+          <!-- <a v-for="tag in data.comment" :key="tag">{{ filterTag(tag.tagId) }}</a> -->
         </div>
       </div>
+      <a-input-search style="position: absolute;width: 267px;top: 86px;left: 259px;" v-model="value" placeholder="搜索笔记名称" enter-button="查询" size="default" />
       <button class="plugin-btn primary" @click="$emit('create')">新建</button>
     </div>
     <div class="comment-list-wrapper">
-      <div class="comment-list" v-if="commentList && commentList.length">
+      <div class="comment-list" v-if="commentsData && commentsData.length">
         <ul class="comment-list-inner content">
-          <li v-for="comment in commentList" :key="comment.id">
-            <a :href="data.url" target="_blank">
+          <li v-for="comment in commentsData" :key="comment.id">
+            <a :href="data.url" target="_blank" :style="comment.backColor">
               <div class="comment-time">
-                <span>{{ comment.updateTime }} {{ comment.formatTime }}</span>
+                <span style="position: absolute;left: 0;color: #CCC;font-size: 18px;">{{ comment.TitleTime }} {{ comment.formatTime }}</span>
                 <a-dropdown :trigger="['click']" class="comment-more">
                   <a-icon type="more" @click.stop="e => e.preventDefault()" style="color: #4d4d4d;font-size:16px;" />
                   <a-menu slot="overlay">
                     <a-menu-item>
                       <div @click="editComment(comment)"><a-icon type="edit" theme="filled" style="font-size:14px;margin-right:8px;" />编辑</div>
                     </a-menu-item>
-                    //删除comment
+                    <!-- //删除comment -->
                     <a-menu-item>
                       <div @click="deleteComment(comment)"><a-icon type="delete" theme="filled" style="font-size:14px;margin-right:8px;" />删除</div>
                     </a-menu-item>
                   </a-menu>
                 </a-dropdown>
               </div>
-              <div class="comment-content htmledit_views markdown_views" v-html="comment.content"></div>
+              <div class="comment-content htmledit_views markdown_views" style="position: absolute;top: 7px;" v-html="comment.TitleContent"></div>
             </a>
           </li>
         </ul>
@@ -46,14 +54,28 @@
 
 <script>
 import BScroll from '../plugins/bscroll';
+import collectServMock from '@/collectBox/api-mock';
 export default {
   data() {
     return {
       bscroll: null,
+      value: '',
+      commentsData: [],
     };
   },
   computed: {
     commentList() {
+      this.data.comments.map((item, index) => {
+        // eslint-disable-next-line dot-notation
+        this.data.comments[index]['TitleContent'] = item.mdContent.slice(0, 12);
+        // eslint-disable-next-line dot-notation
+        this.data.comments[index]['backColor'] = this.getColor();
+        // eslint-disable-next-line dot-notation
+        this.data.comments[index]['TitleTime'] = item.title.slice(1, 17);
+      });
+      console.log(this.data.comments, 'this.data.comments>>>>>>>>>>>>>');
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      this.commentsData = this.data.comments;
       return this.data.comments;
     },
   },
@@ -68,6 +90,32 @@ export default {
     },
   },
   methods: {
+    // 查询笔记名称
+    // onSearch(name) {
+    //   this.commentsData.map((item, index) =>{
+
+    //   })
+    // },
+    // 标签分类查询
+    select(type) {
+      if (type === 23632) {
+        this.commentsData = this.data.comments;
+        return false;
+      }
+      this.commentsData = this.data.comments.filter(p => {
+        console.log(p, '》》》》》》》》》》》》》》》》》》');
+        return p.tagId === type || p.tagId === type + '' || p.tagId[0] === type + '';
+      });
+    },
+    // 生成随机颜色
+    getColor() {
+      var str = '0123456789abcdef';
+      var color = '#';
+      for (var i = 1; i <= 6; i++) {
+        color += str[parseInt(Math.random() * 16)];
+      }
+      return `background: ${color}`;
+    },
     // 初始化滚动
     initScroll() {
       this.$nextTick(() => {
@@ -93,7 +141,7 @@ export default {
       this.$emit('edit', { type: 'collect', data: comment });
     },
     // 删除评论
-    deleteComment() {
+    deleteComment(item) {
       // 注意删除唯一一条评论时，是否要删除帖子
       this.$confirm({
         title: '提示',
@@ -102,7 +150,8 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk: () => {
-          this.$message.success('删除评论');
+          collectServMock.delet(this.data.contentId);
+          this.$message.success('删除成功');
         },
       });
     },
@@ -113,9 +162,18 @@ export default {
         this.initScroll();
       }
     },
+    value: {
+      immediate: true,
+      handler(val) {
+        this.commentsData = this.data.comments.filter(p => {
+          return p.TitleContent.indexOf(val) !== -1;
+        });
+      },
+    },
   },
   mounted() {
     this.initScroll();
+    console.log(this.data, 'this.data....');
   },
   updated() {
     this.initScroll();
@@ -177,7 +235,7 @@ export default {
         flex-direction: column;
         position: relative;
         // min-height: 130px;
-        border: 1px solid #e5e6eb;
+        // border: 1px solid #e5e6eb;
         border-radius: 4px;
         cursor: pointer;
         margin-bottom: 16px;
@@ -190,6 +248,9 @@ export default {
         }
         a {
           padding: 14px 18px 18px;
+          border-top-left-radius: 15px;
+          border-bottom-left-radius: 15px;
+          margin-left: 30%;
         }
 
         .comment-time {
@@ -205,6 +266,8 @@ export default {
           .comment-more {
             padding: 3px 4px;
             border-radius: 2px;
+            flex: 5;
+            text-align: right;
             &:hover {
               background: #f3f3f3;
             }
@@ -213,7 +276,7 @@ export default {
         .comment-content {
           margin-top: 8px;
           font-size: 18px;
-          font-weight: 400;
+          font-weight: 700;
           max-height: 230px;
           color: #222226;
           line-height: 24px;

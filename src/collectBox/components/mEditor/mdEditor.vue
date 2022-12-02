@@ -4,6 +4,9 @@
       按下Enter换行，Ctrl+Enter保存
     </div>
     <div :id="selector" class="area"></div>
+    <!-- <div class="tag-bottom" style="display: flex">
+      <div v-for="(item, index) in tags" @click="selectTage(item)" :key="index">{{ item.label }}</div>
+    </div> -->
   </div>
 </template>
 <script>
@@ -22,6 +25,11 @@ export default {
     selector: {
       type: String,
       default: 'mdEditor',
+    },
+    tags: {
+      type: Array,
+      // eslint-disable-next-line vue/require-valid-default-prop
+      default: [],
     },
     placeholder: {
       type: String,
@@ -172,7 +180,7 @@ export default {
     user-select: none;
     color: #999aaa;
     right: 20px;
-    bottom: 15px;
+    bottom: 83px;
     z-index: 3;
   }
 }
@@ -228,6 +236,15 @@ export default {
   }
   a.cke_button {
     padding: 0 8px !important;
+  }
+}
+.tag-bottom {
+  margin: 20px;
+  div {
+    width: 120px;
+    text-align: center;
+    border-bottom: 1px solid #1a91e7;
+    margin: 10px 20px;
   }
 }
 </style>

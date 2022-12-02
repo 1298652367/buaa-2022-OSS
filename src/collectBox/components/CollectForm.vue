@@ -12,7 +12,38 @@
 
     <div class="collect-box_quote" v-if="$sourcePage && $sourcePage.selection">原文内容： {{ $sourcePage.selection }}</div>
 
-    <div class="collect-box_form">
+    <div class="collect-box_form collect-box_form_flex" v-if="!homePage">
+      <div>
+        <div @click="openwurl">
+          <img src="../assets/images/bkbj.png" alt="" />
+          <p>博客笔记</p>
+        </div>
+        <div @click="openwurl">
+          <img src="../assets/images/gz.png" alt="" />
+          <p>工作</p>
+        </div>
+        <div @click="openwurl">
+          <img src="../assets/images/sh.png" alt="" />
+          <p>生活</p>
+        </div>
+      </div>
+      <div>
+        <div @click="openwurl">
+          <img src="../assets/images/js.png" alt="" />
+          <p>技术</p>
+        </div>
+        <div @click="openwurl">
+          <img src="../assets/images/zl.png" alt="" />
+          <p>资料</p>
+        </div>
+        <div @click="openwurl">
+          <img src="../assets/images/db.png" alt="" />
+          <p>代办</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="collect-box_form" v-if="homePage">
       <Input maxlength="100" v-if="showTitleAndTags" v-model="noteInfo.title" placeholder="请输入笔记标题"></Input>
 
       <mdEditor
@@ -20,11 +51,12 @@
         selector="mdMain"
         @change="v => ((noteInfo.noteMd = v.text), (noteInfo.notehtml = v.html))"
         @doSubmit="submit()"
+        :tags="tags"
         placeholder="请输入正文内容"
       ></mdEditor>
 
       <a-select
-        v-if="showTitleAndTags && tags.length"
+        v-if="tags.length"
         v-model="noteInfo.tags"
         mode="tags"
         :allowClear="true"
@@ -37,7 +69,7 @@
       ></a-select>
     </div>
 
-    <div class="collect-box_footer">
+    <div class="collect-box_footer" v-if="homePage">
       <!-- <div class="remove-collect" data-tooltip-text="删除" style="user-select: none;"></div> -->
 
       <!-- <div class="remove-tips" v-show="!isSaveUriInfo && !isIllegalURL"> 
@@ -85,6 +117,7 @@ export default {
         replyId: '',
         type: '',
       },
+      homePage: true,
       loading: false,
       tags: [],
       noteInfo: {
@@ -141,8 +174,12 @@ export default {
     },
   },
   methods: {
+    openwurl() {
+      window.open('https://bbs.csdn.net/forums/placard?category=0&typeId=23466');
+    },
     tagSelect(val) {
-      this.noteInfo.tags = [val];
+      console.log(val, 'val>>>>>>>>>>>>>>>>');
+      this.noteInfo.tags = val;
 
       this.tags.forEach(v => {
         v.disabled = false;
@@ -205,6 +242,11 @@ export default {
       // 有本地缓存并且不是编辑
       if (noteCache && !this.isEditMode) {
         const { title, content, type, tagIds } = noteCache;
+        if (noteCache.title.indexOf('CSDN社区云') > 0) {
+          this.homePage = false;
+        } else {
+          this.homePage = true;
+        }
         console.log('取得缓存', noteCache);
 
         if (content) {
@@ -244,6 +286,7 @@ export default {
     async edit({ topicId, tagId, data }) {
       this.initCollectedData({ topicId, tagId });
       console.log('edit', { topicId, tagId, data });
+      this.homePage = true;
       this.editComment.replyId = data.data.id;
       this.editComment.type = data.type;
       if (data?.data?.id) {
@@ -291,7 +334,7 @@ export default {
       const posdData = {
         source: this.$sourcePage,
         communityId: this.communityId,
-        tagId: +tagId,
+        tagId: this.noteInfo.tags,
         type: this.isSaveUriInfo ? 'collect' : 'note',
         title: this.noteInfo.title,
         // 富文本编辑器内容
@@ -307,6 +350,7 @@ export default {
         console.log('编辑', posdData);
         // return;
       }
+      console.log(posdData, 'posdData>>>>>>>>>>>>>>>>');
       // mock
       const { code } = await collectServMock.createCollect(posdData);
       // const { code } = await collectServ.createCollect(posdData);
@@ -333,6 +377,7 @@ export default {
         label: v.tabName,
         disabled: false,
       }));
+      console.log(this.tags, 'this.tags>>>>>>>>>>>>>>>');
       const [defaultTagId] = this.tags;
       if (defaultTagId) {
         this.tagSelect(defaultTagId.value);
@@ -366,3 +411,12 @@ export default {
   },
 };
 </script>
+<style scoped>
+.collect-box_form_flex {
+  display: flex;
+  text-align: center;
+}
+.collect-box_form_flex div {
+  flex: 1;
+}
+</style>

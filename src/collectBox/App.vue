@@ -40,7 +40,7 @@
       <a href="https://passport.csdn.net/login?code=public&platform=plugin&openNewTab=false" v-else class="login-btn" target="_blank">立即登录</a>
     </div>
     <template v-else>
-      //为Collected绑定删除comment的方法
+      <!-- //为Collected绑定删除comment的方法 -->
       <Collected v-if="tab === 'collected' && collectedData" :data="collectedData" :cloud-url="myCCloudURL" @create="createComment()" @edit="editComment"></Collected>
       <CollectForm
         v-if="bbsInfo && tab === 'create'"
