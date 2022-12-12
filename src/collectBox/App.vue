@@ -41,7 +41,14 @@
     </div>
     <template v-else>
       <!-- //为Collected绑定删除comment的方法 -->
-      <Collected v-if="tab === 'collected' && collectedData" :data="collectedData" :cloud-url="myCCloudURL" @create="createComment()" @edit="editComment"></Collected>
+      <Collected
+        v-if="tab === 'collected' && collectedData"
+        :data="collectedData"
+        :cloud-url="myCCloudURL"
+        @create="createComment()"
+        @edit="editComment"
+        @delete="delComment"
+      ></Collected>
       <CollectForm
         v-if="bbsInfo && tab === 'create'"
         ref="CollectForm"
@@ -139,19 +146,33 @@ export default {
         });
       });
     },
-    editComment(comment) {
+    editComment(data) {
       this.tab = 'create';
       this.$nextTick(() => {
         // 编辑时首先应该重设编辑的id 和 分类id
         this.$refs.CollectForm.edit({
           topicId: this.collectedData.contentId,
           tagId: this.collectedData.cateId,
-          data: comment,
+          data: data,
         });
       });
     },
     // 添加删除comment的方法
-    delComment() {},
+    delComment(data) {
+      this.$confirm({
+        title: '提示',
+        content: '确认删除该笔记？',
+        okText: '删除',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk: async () => {
+          console.log('delete id: ' + data.data.id);
+          await collectServMock.delet(data.data.id + '');
+          await this.checkCollected();
+          this.$message.success('删除成功');
+        },
+      });
+    },
     // 获取用户信息
     getUserInfo() {
       const getUser = () => {

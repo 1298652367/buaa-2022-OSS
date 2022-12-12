@@ -38,7 +38,7 @@
         </div>
         <div @click="openwurl">
           <img src="../assets/images/db.png" alt="" />
-          <p>代办</p>
+          <p>待办</p>
         </div>
       </div>
     </div>
@@ -66,6 +66,19 @@
         class="tags-select"
         @blur="val => (noteInfo.tags = val.slice(-1))"
         @select="tagSelect"
+      ></a-select>
+
+      <a-select
+        v-if="showBacklogOption"
+        v-model="noteInfo.backlogOption"
+        mode="tags"
+        :allowClear="true"
+        style="width:100%;"
+        placeholder="待办选项"
+        :options="backlogOption"
+        class="tags-select"
+        @blur="val => (noteInfo.backlogOption = val.slice(-1))"
+        @select="backlogOptionSelect"
       ></a-select>
     </div>
 
@@ -120,11 +133,14 @@ export default {
       homePage: true,
       loading: false,
       tags: [],
+      backlogOption: [],
+      showBacklogOption: false,
       noteInfo: {
         title: '',
         noteMd: '',
         notehtml: '',
         tags: [],
+        backlogOption: [],
       },
       baseInfo: {
         title: '',
@@ -177,10 +193,13 @@ export default {
     openwurl() {
       window.open('https://bbs.csdn.net/forums/placard?category=0&typeId=23466');
     },
+    // type: 0 tags, 1 backlogOption
     tagSelect(val) {
       console.log(val, 'val>>>>>>>>>>>>>>>>');
+      if (val === '23651') this.showBacklogOption = true;
+      else this.showBacklogOption = false;
+      console.log('showBacklogOption: ' + this.showBacklogOption);
       this.noteInfo.tags = val;
-
       this.tags.forEach(v => {
         v.disabled = false;
       });
@@ -188,6 +207,19 @@ export default {
       if (curTagIndex > -1) {
         this.tags[curTagIndex] = {
           ...this.tags[curTagIndex],
+          disabled: true,
+        };
+      }
+    },
+    backlogOptionSelect(val) {
+      this.noteInfo.backlogOption = val;
+      this.backlogOption.forEach(v => {
+        v.disabled = false;
+      });
+      const curBacklogOptionIndex = this.backlogOption.findIndex(v => val === v.value);
+      if (curBacklogOptionIndex > -1) {
+        this.backlogOption[curBacklogOptionIndex] = {
+          ...this.backlogOption[curBacklogOptionIndex],
           disabled: true,
         };
       }
@@ -306,8 +338,9 @@ export default {
         return;
       }
       this.loading = true;
-
+      console.log(1);
       let [tagId] = this.noteInfo.tags;
+      console.log(tagId);
       if (!tagId) {
         const [defaultTag] = this.tags;
         if (defaultTag) {
@@ -331,6 +364,11 @@ export default {
           }
         }
       }
+      console.log(3);
+      if (tagId === '23651') {
+        this.noteInfo.tags = this.noteInfo.backlogOption;
+      }
+      console.log(4);
       const posdData = {
         source: this.$sourcePage,
         communityId: this.communityId,
@@ -381,6 +419,16 @@ export default {
       const [defaultTagId] = this.tags;
       if (defaultTagId) {
         this.tagSelect(defaultTagId.value);
+      }
+      const list1 = await collectServMock.backlogOptionList();
+      this.backlogOption = list1.map(v => ({
+        value: v.id + '',
+        label: v.tabName,
+        disabled: false,
+      }));
+      const [defaultBacklogOptionId] = this.backlogOption;
+      if (defaultBacklogOptionId) {
+        this.backlogOptionSelect(defaultBacklogOptionId.value);
       }
     },
     // 取得标题中去除时间的标题

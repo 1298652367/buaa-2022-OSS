@@ -52,6 +52,7 @@ export default {
   },
   async createCollect(formData) {
     const list = await collectDB.list();
+    console.log('数据list: ' + list);
     const { topicId, replyId, type, source, ...data } = formData;
     const _replyId = replyId || +new Date() + '';
 
@@ -183,7 +184,7 @@ export default {
       {
         tabContribute: 6,
         cdId: 4451,
-        tabName: '代表',
+        tabName: '待办',
         createTime: null,
         sortType: 1,
         cardType: 0,
@@ -196,6 +197,66 @@ export default {
       },
     ];
     // return tagService.list();
+  },
+  async backlogOptionList() {
+    return [
+      {
+        tabContribute: 7,
+        cdId: 4451,
+        tabName: '重要不紧急',
+        createTime: null,
+        sortType: 1,
+        cardType: 0,
+        tabType: 1,
+        indexOrder: 0,
+        id: 23652,
+        tabUrl: '',
+        tabSwitch: 1,
+        status: 0,
+      },
+      {
+        tabContribute: 8,
+        cdId: 4451,
+        tabName: '紧急不重要',
+        createTime: null,
+        sortType: 1,
+        cardType: 0,
+        tabType: 1,
+        indexOrder: 0,
+        id: 23653,
+        tabUrl: '',
+        tabSwitch: 1,
+        status: 0,
+      },
+      {
+        tabContribute: 9,
+        cdId: 4451,
+        tabName: '重要紧急',
+        createTime: null,
+        sortType: 1,
+        cardType: 0,
+        tabType: 1,
+        indexOrder: 0,
+        id: 23654,
+        tabUrl: '',
+        tabSwitch: 1,
+        status: 0,
+      },
+      {
+        tabContribute: 10,
+        cdId: 4451,
+        tabName: '不紧急不重要',
+        createTime: null,
+        sortType: 1,
+        cardType: 0,
+        tabType: 1,
+        indexOrder: 0,
+        id: 23655,
+        tabUrl: '',
+        tabSwitch: 1,
+        status: 0,
+      },
+    ];
   },
   async tagCreate(tagName) {
     return {

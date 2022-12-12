@@ -15,7 +15,7 @@
           <a @click="select(23648)">工作</a>
           <a @click="select(23649)">资料</a>
           <a @click="select(23650)">生活</a>
-          <a @click="select(23651)">代办</a>
+          <a @click="select(23651)">待办</a>
           <!-- <span v-else>{{ data.cateName }}</span> -->
           <!-- <a v-for="tag in data.comment" :key="tag">{{ filterTag(tag.tagId) }}</a> -->
         </div>
@@ -26,7 +26,7 @@
     <div class="comment-list-wrapper">
       <div class="comment-list" v-if="commentsData && commentsData.length">
         <ul class="comment-list-inner content">
-          <li v-for="comment in commentsData" :key="comment.id">
+          <li v-for="(comment, index) in commentsData" :key="comment.id">
             <a :href="data.url" target="_blank" :style="comment.backColor">
               <div class="comment-time">
                 <span style="position: absolute;left: 0;color: #CCC;font-size: 18px;">{{ comment.TitleTime }} {{ comment.formatTime }}</span>
@@ -43,7 +43,11 @@
                   </a-menu>
                 </a-dropdown>
               </div>
-              <div class="comment-content htmledit_views markdown_views" style="position: absolute;top: 7px;" v-html="comment.TitleContent"></div>
+              <div
+                class="comment-content htmledit_views markdown_views"
+                style="position: absolute;top: 7px;"
+                v-html="comment.TitleContent + ' ' + (backlog[index] === undefined ? '' : backlog[index]) + ' ' + tag[index]"
+              ></div>
             </a>
           </li>
         </ul>
@@ -61,6 +65,8 @@ export default {
       bscroll: null,
       value: '',
       commentsData: [],
+      tag: [],
+      backlog: [],
     };
   },
   computed: {
@@ -72,6 +78,8 @@ export default {
         this.data.comments[index]['backColor'] = this.getColor();
         // eslint-disable-next-line dot-notation
         this.data.comments[index]['TitleTime'] = item.title.slice(1, 17);
+        // eslint-disable-next-line dot-notation
+        this.data.comments[index]['tagId'] = item.tagId;
       });
       console.log(this.data.comments, 'this.data.comments>>>>>>>>>>>>>');
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
@@ -96,16 +104,65 @@ export default {
 
     //   })
     // },
+    // 根据type返回笔记标签名称
+    async getTag(type) {
+      const list = await collectServMock.tagList();
+      const tagList = list.map(v => ({
+        value: v.id + '',
+        label: v.tabName,
+      }));
+      for (let i = 0; i < tagList.length; i++) {
+        console.log('tagList[i].value: ' + tagList[i].value);
+        console.log(typeof tagList[i].value);
+        console.log('type: ' + type);
+        if (tagList[i].value === type + '') {
+          console.log('getType: in');
+          this.tag.push(tagList[i].label);
+          return tagList[i].label;
+        }
+      }
+      this.tag.push('待办');
+      return '待办';
+    },
+    async getBacklog(type) {
+      const list = await collectServMock.backlogOptionList();
+      const backlogOptionList = list.map(v => ({
+        value: v.id + '',
+        label: v.tabName,
+      }));
+      for (let i = 0; i < backlogOptionList.length; i++) {
+        if (backlogOptionList[i].value === type + '') {
+          this.backlog.push(backlogOptionList[i].label);
+          return backlogOptionList[i].label;
+        }
+      }
+      this.backlog.push(undefined);
+      return undefined;
+    },
     // 标签分类查询
     select(type) {
       if (type === 23632) {
         this.commentsData = this.data.comments;
-        return false;
+        console.log(23632);
+      } else if (type === 23651) {
+        this.commentsData = this.data.comments.filter(p => {
+          return p.tagId === '23651' + '' || p.tagId === '23652' + '' || p.tagId === '23653' + '' || p.tagId === '23654' + '' || p.tagId === '23655' + '';
+        });
+      } else {
+        this.commentsData = this.data.comments.filter(p => {
+          console.log(p, '》》》》》》》》》》》》》》》》》》');
+          return p.tagId === type || p.tagId === type + '' || p.tagId[0] === type + '';
+        });
       }
-      this.commentsData = this.data.comments.filter(p => {
-        console.log(p, '》》》》》》》》》》》》》》》》》》');
-        return p.tagId === type || p.tagId === type + '' || p.tagId[0] === type + '';
-      });
+      this.tag = [];
+      this.backlog = [];
+      for (let i = 0; i < this.commentsData.length; i++) {
+        this.getTag(this.commentsData[i].tagId);
+        this.getBacklog(this.commentsData[i].tagId);
+        console.log('tag: ' + this.tag[i]);
+        console.log('backlog: ' + this.backlog[i]);
+      }
+      console.log('commentsData: ' + this.commentsData);
     },
     // 生成随机颜色
     getColor() {
@@ -141,19 +198,9 @@ export default {
       this.$emit('edit', { type: 'collect', data: comment });
     },
     // 删除评论
-    deleteComment(item) {
+    async deleteComment(comment) {
       // 注意删除唯一一条评论时，是否要删除帖子
-      this.$confirm({
-        title: '提示',
-        content: '确认删除该笔记？',
-        okText: '删除',
-        okType: 'danger',
-        cancelText: '取消',
-        onOk: () => {
-          collectServMock.delet(this.data.contentId);
-          this.$message.success('删除成功');
-        },
-      });
+      this.$emit('delete', { type: 'collect', data: comment });
     },
   },
   watch: {
@@ -173,6 +220,7 @@ export default {
   },
   mounted() {
     this.initScroll();
+    this.select(23632);
     console.log(this.data, 'this.data....');
   },
   updated() {
